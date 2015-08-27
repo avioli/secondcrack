@@ -6,7 +6,8 @@ class Updater
     public static $dest_path;
     public static $cache_path;
     public static $post_extension = '.md';
-    
+    public static $use_index_html = false;
+
     // This option writes each draft preview into (web root)/drafts/whatever-slug
     // Without it, drafts only reside in the (source)/drafts/_previews folder 
     //  and are not accessible publicly.
@@ -295,11 +296,15 @@ class Updater
     public static function archive_array($scope = '')
     {
         $out = array();
+        $suffix_path = '';
+        if (Updater::$use_index_html && $scope !== '') {
+            $suffix_path = '/'; // index.html
+        }
         foreach (self::months_with_posts($scope) as $year => $months) {
             foreach ($months as $month => $x) {
                 $ts = mktime(0, 0, 0, $month, 15, $year);
                 $out[$year . str_pad($month, 2, '0', STR_PAD_LEFT)] = array(
-                    'archives-uri' => "/$year/" . str_pad($month, 2, '0', STR_PAD_LEFT) . '/' . $scope,
+                    'archives-uri' => "/$year/" . str_pad($month, 2, '0', STR_PAD_LEFT) . '/' . $scope . $suffix_path,
                     'archives-year' => $year,
                     'archives-month-number' => intval($month),
                     'archives-month-name' => date('F', $ts),

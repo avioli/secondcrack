@@ -177,6 +177,8 @@ class Post
         // Convert relative image references to absolute so index pages work
         $base_uri = '/' . $this->year . '/' . str_pad($this->month, 2, '0', STR_PAD_LEFT) . '/' . str_pad($this->day, 2, '0', STR_PAD_LEFT);
         
+        $suffix_path = Updater::$use_index_html ? '/' : '';
+
         return array_merge(
             $this->headers,
             array(
@@ -187,10 +189,10 @@ class Post
                 'post-body' => $this->rendered_body(),
                 'post-tags' => $tags,
                 'post-type' => $this->type,
-                'post-permalink' => $base_uri . '/' . $this->slug,
-                'post-permalink-or-link' => isset($this->headers['link']) && $this->headers['link'] ? $this->headers['link'] : $base_uri . '/' . $this->slug,
-                'post-absolute-permalink' => rtrim(self::$blog_url, '/') . $base_uri . '/' . $this->slug,
-                'post-absolute-permalink-or-link' => rtrim(self::$blog_url, '/') . (isset($this->headers['link']) && $this->headers['link'] ? $this->headers['link'] : $base_uri . '/' . $this->slug),
+                'post-permalink' => $base_uri . '/' . $this->slug . $suffix_path,
+                'post-permalink-or-link' => isset($this->headers['link']) && $this->headers['link'] ? $this->headers['link'] : $base_uri . '/' . $this->slug . $suffix_path,
+                'post-absolute-permalink' => rtrim(self::$blog_url, '/') . $base_uri . '/' . $this->slug . $suffix_path,
+                'post-absolute-permalink-or-link' => rtrim(self::$blog_url, '/') . (isset($this->headers['link']) && $this->headers['link'] ? $this->headers['link'] : $base_uri . '/' . $this->slug . $suffix_path),
 
                 'post-is-first-on-date' => $this->is_first_post_on_this_date ? 'yes' : '',
             )
@@ -214,7 +216,14 @@ class Post
         $output_html = $t->outputHTML();
 
         if (! file_exists(Updater::$dest_path)) mkdir_as_parent_owner(Updater::$dest_path, 0755, true);
-        file_put_contents_as_dir_owner(Updater::$dest_path . '/' . $this->slug, $output_html);
+        if (Updater::$use_index_html) {
+            $slug_path = Updater::$dest_path . '/' . $this->slug;
+            if (! file_exists($slug_path)) mkdir_as_parent_owner($slug_path, 0755, true);
+            $suffix_path = '/index.html';
+        } else {
+            $suffix_path = '';
+        }
+        file_put_contents_as_dir_owner(Updater::$dest_path . '/' . $this->slug . $suffix_path, $output_html);
     }
     
     public function write_permalink_page($draft = false)
@@ -244,7 +253,14 @@ class Post
             $output_www_path = $draft ? '/drafts' : dirname($post_data['post-permalink']);
             $output_path = Updater::$dest_path . $output_www_path;
             if (! file_exists($output_path)) mkdir_as_parent_owner($output_path, 0755, true);
-            file_put_contents_as_dir_owner(Updater::$dest_path . ($draft ? '/drafts/' . $this->slug : $post_data['post-permalink']), $output_html);
+            if (! $draft && Updater::$use_index_html) {
+                $slug_path = $output_path . '/' . basename($post_data['post-permalink']);
+                if (! file_exists($slug_path)) mkdir_as_parent_owner($slug_path, 0755, true);
+                $suffix_path = 'index.html'; // Note: not '/index.html', eg. no slash
+            } else {
+                $suffix_path = '';
+            }
+            file_put_contents_as_dir_owner(Updater::$dest_path . ($draft ? '/drafts/' . $this->slug : ($post_data['post-permalink'] . $suffix_path)), $output_html);
         }
         
         if ($draft) file_put_contents_as_dir_owner(Updater::$source_path . '/drafts/_previews/' . $this->slug . '.html', $output_html);
