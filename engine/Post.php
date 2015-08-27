@@ -1,12 +1,5 @@
 <?php
 
-$fdir = dirname(__FILE__);
-require_once($fdir . '/PHPMarkdownExtra/markdown.php');
-require_once($fdir . '/PHPSmartyPants/smartypants.php');
-require_once($fdir . '/Updater.php');
-require_once($fdir . '/Template.php');
-require_once($fdir . '/Utils.php');
-
 class Post
 {
     public static $blog_title = 'Untitled Blog';

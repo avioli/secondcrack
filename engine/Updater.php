@@ -1,8 +1,5 @@
 <?php
 
-require_once(dirname(__FILE__) . '/Post.php');
-require_once(dirname(__FILE__) . '/Hook.php');
-
 class Updater
 {
     public static $source_path;

@@ -24,7 +24,7 @@ if (file_put_contents(LOCK_FILE, posix_getpid())) {
 }
 
 $fdir = dirname(__FILE__);
-require_once($fdir . '/Post.php');
+require_once($fdir . '/engine.php');
 
 $config_file = realpath(dirname(__FILE__) . '/..') . '/config.php';
 if (! file_exists($config_file)) {
