@@ -18,6 +18,7 @@ class Updater
     public static $frontpage_type_filter = false;
     public static $frontpage_paginate = false;
 
+    public static $generate_rss = true;
     public static $rss_post_limit = 20;
     public static $rss_template = 'rss.php';
     public static $rss_tag_filter = '!site-only';
@@ -570,14 +571,16 @@ class Updater
                 $seq_count
             );
 
-            error_log("Updating RSS...");
-            Post::write_index(
-                self::$dest_path . "/rss.xml", 
-                Post::$blog_title, 
-                'rss', 
-                Post::from_files(self::most_recent_post_filenames(self::$rss_post_limit, self::$rss_tag_filter, self::$rss_type_filter)),
-                self::$rss_template
-            );
+            if (Updater::$generate_rss) {
+                error_log("Updating RSS...");
+                Post::write_index(
+                    self::$dest_path . "/rss.xml", 
+                    Post::$blog_title, 
+                    'rss', 
+                    Post::from_files(self::most_recent_post_filenames(self::$rss_post_limit, self::$rss_tag_filter, self::$rss_type_filter)),
+                    self::$rss_template
+                );
+            }
         }
 
         foreach (self::$index_months_to_be_updated as $ym => $x) {
@@ -622,14 +625,16 @@ class Updater
                 $seq_count
             );
 
-            Post::write_index(
-                self::$dest_path . "/tagged-$tag.xml", 
-                Post::$blog_title, 
-                'tag', 
-                Post::from_files(self::most_recent_post_filenames(self::$rss_post_limit, $tag, self::$archive_tag_filter)),
-                self::$rss_template,
-                self::archive_array('tagged-' . $tag)
-            );
+            if (Updater::$generate_rss) {
+                Post::write_index(
+                    self::$dest_path . "/tagged-$tag.xml", 
+                    Post::$blog_title, 
+                    'tag', 
+                    Post::from_files(self::most_recent_post_filenames(self::$rss_post_limit, $tag, self::$archive_tag_filter)),
+                    self::$rss_template,
+                    self::archive_array('tagged-' . $tag)
+                );
+            }
 
             $months_with_posts = self::months_with_posts('tagged-' . $tag);
             foreach (self::$index_months_to_be_updated as $ym => $x) {
@@ -663,14 +668,16 @@ class Updater
                 self::archive_array('type-' . $type)
             );
 
-            Post::write_index(
-                self::$dest_path . "/type-$type.xml", 
-                Post::$blog_title, 
-                'type', 
-                Post::from_files(self::most_recent_post_filenames(self::$rss_post_limit, self::$archive_type_filter, $type)),
-                self::$rss_template,
-                self::archive_array('type-' . $type)
-            );
+            if (Updater::$generate_rss) {
+                Post::write_index(
+                    self::$dest_path . "/type-$type.xml", 
+                    Post::$blog_title, 
+                    'type', 
+                    Post::from_files(self::most_recent_post_filenames(self::$rss_post_limit, self::$archive_type_filter, $type)),
+                    self::$rss_template,
+                    self::archive_array('type-' . $type)
+                );
+            }
 
             $months_with_posts = self::months_with_posts('type-' . $type);
             foreach (self::$index_months_to_be_updated as $ym => $x) {
